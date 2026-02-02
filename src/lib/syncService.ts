@@ -105,7 +105,10 @@ export const syncProductos = async (): Promise<{ count: number; error?: string }
         codigo: producto.codigo || '',
         nombre: producto.nombre || producto.descripcion || '',
         descripcion: producto.descripcion || '',
-        precio: producto.precio || producto.precio_venta || 0,
+        precio: 0, // Se calcula dinámicamente con priceService
+        precio_costo: producto.precio_costo || 0,
+        marca_id: producto.marca_id || null,
+        tipo_producto_id: producto.tipo_producto_id || null,
         stock: producto.stock || producto.stock_actual || 0,
         categoria: producto.categoria || 'General',
         imagen_url: producto.imagen_url,
