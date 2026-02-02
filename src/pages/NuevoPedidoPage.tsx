@@ -57,8 +57,9 @@ export const NuevoPedidoPage = () => {
       p.codigo.toLowerCase().includes(searchProducto.toLowerCase())
   );
 
-  const addToCart = (producto: Producto) => {
+  const addToCart = (producto: ProductoConPrecio) => {
     const existingItem = cart.find((item) => item.producto_id === producto.id);
+    const precioFinal = producto.precio_calculado || producto.precio;
     
     if (existingItem) {
       setCart(
@@ -79,8 +80,8 @@ export const NuevoPedidoPage = () => {
           producto_id: producto.id,
           producto_nombre: producto.nombre,
           cantidad: 1,
-          precio_unitario: producto.precio,
-          subtotal: producto.precio,
+          precio_unitario: precioFinal,
+          subtotal: precioFinal,
           stock: producto.stock,
         },
       ]);
