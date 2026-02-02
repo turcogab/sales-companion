@@ -17,6 +17,7 @@ export interface SyncResult {
   downloaded: {
     clientes: number;
     productos: number;
+    listaPrecioPorcentajes: number;
   };
   uploaded: {
     pedidos: number;
