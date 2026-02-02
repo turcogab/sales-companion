@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.6b7a1fe79c0e4320bf24de929d986228',
+  appId: 'com.preventista.app',
   appName: 'Preventista',
   webDir: 'dist',
   server: {
