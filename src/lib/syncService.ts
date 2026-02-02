@@ -125,6 +125,46 @@ export const syncProductos = async (): Promise<{ count: number; error?: string }
   }
 };
 
+// Descargar lista_precio_porcentajes desde Supabase
+export const syncListaPrecioPorcentajes = async (): Promise<{ count: number; error?: string }> => {
+  try {
+    let allData: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from('lista_precio_porcentajes')
+        .select('*')
+        .range(from, from + pageSize - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      
+      allData = [...allData, ...data];
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+
+    await clearStore('lista_precio_porcentajes');
+    
+    for (const item of allData) {
+      await put<ListaPrecioPorcentaje>('lista_precio_porcentajes', {
+        id: item.id,
+        lista_precio_id: item.lista_precio_id || '',
+        marca_id: item.marca_id || null,
+        tipo_producto_id: item.tipo_producto_id || null,
+        porcentaje: item.porcentaje || 0,
+      });
+    }
+    
+    return { count: allData.length };
+  } catch (error: any) {
+    console.error('Error syncing lista_precio_porcentajes:', error);
+    return { count: 0, error: error.message };
+  }
+};
+
 // Subir pedidos pendientes a Supabase
 export const uploadPedidos = async (): Promise<{ count: number; error?: string }> => {
   try {
