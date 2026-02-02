@@ -26,11 +26,22 @@ export interface Producto {
   nombre: string;
   descripcion: string;
   precio: number;
+  precio_costo: number;
+  marca_id: string | null;
+  tipo_producto_id: string | null;
   stock: number;
   categoria: string;
   imagen_url?: string;
   sincronizado: boolean;
   updated_at: string;
+}
+
+export interface ListaPrecioPorcentaje {
+  id: string;
+  lista_precio_id: string;
+  marca_id: string | null;
+  tipo_producto_id: string | null;
+  porcentaje: number;
 }
 
 export interface ItemPedido {
