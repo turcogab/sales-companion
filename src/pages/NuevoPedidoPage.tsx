@@ -103,10 +103,6 @@ export const NuevoPedidoPage = () => {
           if (item.producto_id === productoId) {
             const newQty = item.cantidad + delta;
             if (newQty <= 0) return null;
-            if (newQty > item.stock) {
-              toast.error('Stock insuficiente');
-              return item;
-            }
             return {
               ...item,
               cantidad: newQty,
