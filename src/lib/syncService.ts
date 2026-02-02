@@ -206,7 +206,7 @@ export const uploadSinglePedido = async (pedido: Pedido): Promise<{ success: boo
     const itemsToInsert = pedido.items.map(item => ({
       pedido_id: pedido.id,
       producto_id: item.producto_id,
-      cantidad: item.cantidad,
+      cantidad_pedida: item.cantidad,
       precio_unitario: item.precio_unitario,
       subtotal: item.subtotal,
     }));
