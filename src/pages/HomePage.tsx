@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, Package, ShoppingCart, MapPin, CreditCard, 
@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useAuth } from '@/hooks/useAuth';
 import { fullSync } from '@/lib/syncService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
