@@ -233,7 +233,7 @@ export const uploadCobranzas = async (): Promise<{ count: number; error?: string
 export const fullSync = async (): Promise<SyncResult> => {
   const result: SyncResult = {
     success: true,
-    downloaded: { clientes: 0, productos: 0 },
+    downloaded: { clientes: 0, productos: 0, listaPrecioPorcentajes: 0 },
     uploaded: { pedidos: 0, cobranzas: 0 },
     errors: [],
   };
@@ -262,6 +262,13 @@ export const fullSync = async (): Promise<SyncResult> => {
   result.downloaded.productos = productosResult.count;
   if (productosResult.error) {
     result.errors.push(`Productos: ${productosResult.error}`);
+  }
+
+  // 3. Descargar lista de precios porcentajes
+  const listaPreciosResult = await syncListaPrecioPorcentajes();
+  result.downloaded.listaPrecioPorcentajes = listaPreciosResult.count;
+  if (listaPreciosResult.error) {
+    result.errors.push(`Lista Precios: ${listaPreciosResult.error}`);
   }
 
   // Actualizar timestamp de última sincronización
