@@ -264,10 +264,7 @@ export const NuevoPedidoPage = () => {
                 return (
                   <Card
                     key={producto.id}
-                    className={cn(
-                      "shadow-card",
-                      producto.stock <= 0 && "opacity-50"
-                    )}
+                    className="shadow-card"
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
