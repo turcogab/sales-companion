@@ -37,7 +37,7 @@ export const NuevoPedidoPage = () => {
     const loadData = async () => {
       const [clientesData, productosData] = await Promise.all([
         getAll<Cliente>('clientes'),
-        getAll<Producto>('productos'),
+        getProductosConPrecios(),
       ]);
       setClientes(clientesData);
       setProductos(productosData);
