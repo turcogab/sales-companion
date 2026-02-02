@@ -1,8 +1,10 @@
-import { Wifi, WifiOff, RefreshCw, Menu } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, Menu, LogOut } from 'lucide-react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   title: string;
@@ -13,6 +15,12 @@ interface HeaderProps {
 export const Header = ({ title, onMenuClick, showMenu = true }: HeaderProps) => {
   const isOnline = useOnlineStatus();
   const { pendingCount, refresh } = useSyncStatus();
+  const { isAuthenticated, signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Sesión cerrada');
+  };
 
   return (
     <header className="gradient-header text-primary-foreground sticky top-0 z-50 safe-top">
