@@ -169,7 +169,8 @@ export const uploadPedidos = async (): Promise<{ count: number; error?: string }
 // Subir cobranzas pendientes a Supabase
 export const uploadCobranzas = async (): Promise<{ count: number; error?: string }> => {
   try {
-    const cobranzasPendientes = await getByIndex<Cobranza>('cobranzas', 'sincronizado', false as unknown as IDBValidKey);
+    const allCobranzas = await getAll<Cobranza>('cobranzas');
+    const cobranzasPendientes = allCobranzas.filter(c => !c.sincronizado);
     
     let uploaded = 0;
     
