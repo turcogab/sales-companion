@@ -8,7 +8,8 @@ import {
   Cliente, 
   Producto, 
   Pedido, 
-  Cobranza 
+  Cobranza,
+  ListaPrecioPorcentaje
 } from './db';
 
 export interface SyncResult {
@@ -16,6 +17,7 @@ export interface SyncResult {
   downloaded: {
     clientes: number;
     productos: number;
+    listaPrecioPorcentajes: number;
   };
   uploaded: {
     pedidos: number;
@@ -104,7 +106,10 @@ export const syncProductos = async (): Promise<{ count: number; error?: string }
         codigo: producto.codigo || '',
         nombre: producto.nombre || producto.descripcion || '',
         descripcion: producto.descripcion || '',
-        precio: producto.precio || producto.precio_venta || 0,
+        precio: 0, // Se calcula dinámicamente con priceService
+        precio_costo: producto.precio_costo || 0,
+        marca_id: producto.marca_id || null,
+        tipo_producto_id: producto.tipo_producto_id || null,
         stock: producto.stock || producto.stock_actual || 0,
         categoria: producto.categoria || 'General',
         imagen_url: producto.imagen_url,
@@ -116,6 +121,46 @@ export const syncProductos = async (): Promise<{ count: number; error?: string }
     return { count: allData.length };
   } catch (error: any) {
     console.error('Error syncing productos:', error);
+    return { count: 0, error: error.message };
+  }
+};
+
+// Descargar lista_precio_porcentajes desde Supabase
+export const syncListaPrecioPorcentajes = async (): Promise<{ count: number; error?: string }> => {
+  try {
+    let allData: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from('lista_precio_porcentajes')
+        .select('*')
+        .range(from, from + pageSize - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      
+      allData = [...allData, ...data];
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+
+    await clearStore('lista_precio_porcentajes');
+    
+    for (const item of allData) {
+      await put<ListaPrecioPorcentaje>('lista_precio_porcentajes', {
+        id: item.id,
+        lista_precio_id: item.lista_precio_id || '',
+        marca_id: item.marca_id || null,
+        tipo_producto_id: item.tipo_producto_id || null,
+        porcentaje: item.porcentaje || 0,
+      });
+    }
+    
+    return { count: allData.length };
+  } catch (error: any) {
+    console.error('Error syncing lista_precio_porcentajes:', error);
     return { count: 0, error: error.message };
   }
 };
@@ -228,7 +273,7 @@ export const uploadCobranzas = async (): Promise<{ count: number; error?: string
 export const fullSync = async (): Promise<SyncResult> => {
   const result: SyncResult = {
     success: true,
-    downloaded: { clientes: 0, productos: 0 },
+    downloaded: { clientes: 0, productos: 0, listaPrecioPorcentajes: 0 },
     uploaded: { pedidos: 0, cobranzas: 0 },
     errors: [],
   };
@@ -257,6 +302,13 @@ export const fullSync = async (): Promise<SyncResult> => {
   result.downloaded.productos = productosResult.count;
   if (productosResult.error) {
     result.errors.push(`Productos: ${productosResult.error}`);
+  }
+
+  // 3. Descargar lista de precios porcentajes
+  const listaPreciosResult = await syncListaPrecioPorcentajes();
+  result.downloaded.listaPrecioPorcentajes = listaPreciosResult.count;
+  if (listaPreciosResult.error) {
+    result.errors.push(`Lista Precios: ${listaPreciosResult.error}`);
   }
 
   // Actualizar timestamp de última sincronización

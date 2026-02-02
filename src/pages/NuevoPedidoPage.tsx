@@ -12,7 +12,8 @@ import {
   SheetTitle,
   SheetTrigger 
 } from '@/components/ui/sheet';
-import { getAll, put, generateId, Cliente, Producto, Pedido, ItemPedido } from '@/lib/db';
+import { getAll, put, generateId, Cliente, Pedido, ItemPedido, ListaPrecioPorcentaje } from '@/lib/db';
+import { getProductosConPrecios, ProductoConPrecio } from '@/lib/priceService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -23,7 +24,7 @@ interface CartItem extends ItemPedido {
 export const NuevoPedidoPage = () => {
   const navigate = useNavigate();
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [productos, setProductos] = useState<Producto[]>([]);
+  const [productos, setProductos] = useState<ProductoConPrecio[]>([]);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchCliente, setSearchCliente] = useState('');
@@ -36,7 +37,7 @@ export const NuevoPedidoPage = () => {
     const loadData = async () => {
       const [clientesData, productosData] = await Promise.all([
         getAll<Cliente>('clientes'),
-        getAll<Producto>('productos'),
+        getProductosConPrecios(),
       ]);
       setClientes(clientesData);
       setProductos(productosData);
@@ -56,8 +57,9 @@ export const NuevoPedidoPage = () => {
       p.codigo.toLowerCase().includes(searchProducto.toLowerCase())
   );
 
-  const addToCart = (producto: Producto) => {
+  const addToCart = (producto: ProductoConPrecio) => {
     const existingItem = cart.find((item) => item.producto_id === producto.id);
+    const precioFinal = producto.precio_calculado || producto.precio;
     
     if (existingItem) {
       setCart(
@@ -78,8 +80,8 @@ export const NuevoPedidoPage = () => {
           producto_id: producto.id,
           producto_nombre: producto.nombre,
           cantidad: 1,
-          precio_unitario: producto.precio,
-          subtotal: producto.precio,
+          precio_unitario: precioFinal,
+          subtotal: precioFinal,
           stock: producto.stock,
         },
       ]);
@@ -263,7 +265,7 @@ export const NuevoPedidoPage = () => {
                           <p className="font-medium text-foreground truncate">{producto.nombre}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-sm font-semibold text-primary">
-                              {formatCurrency(producto.precio)}
+                              {formatCurrency(producto.precio_calculado || producto.precio)}
                             </p>
                             <span className={cn(
                               "text-xs",
