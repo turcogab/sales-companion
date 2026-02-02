@@ -165,6 +165,67 @@ export const syncListaPrecioPorcentajes = async (): Promise<{ count: number; err
   }
 };
 
+// Subir un pedido individual a Supabase
+export const uploadSinglePedido = async (pedido: Pedido): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Insertar el pedido
+    const { error: pedidoError } = await supabase
+      .from('pedidos')
+      .insert({
+        id: pedido.id,
+        cliente_id: pedido.cliente_id,
+        total: pedido.total,
+        estado: pedido.estado,
+        notas: pedido.notas,
+        created_at: pedido.created_at,
+      });
+
+    if (pedidoError) {
+      console.error('Error uploading pedido:', pedidoError);
+      
+      // Detectar errores específicos de RLS
+      if (pedidoError.code === '42501' || pedidoError.message?.includes('row-level security')) {
+        return { 
+          success: false, 
+          error: 'Sin permisos para sincronizar. Contacta al administrador.' 
+        };
+      }
+      
+      return { success: false, error: pedidoError.message };
+    }
+
+    // Insertar los items del pedido
+    const itemsToInsert = pedido.items.map(item => ({
+      pedido_id: pedido.id,
+      producto_id: item.producto_id,
+      cantidad: item.cantidad,
+      precio_unitario: item.precio_unitario,
+      subtotal: item.subtotal,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('pedido_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) {
+      console.error('Error uploading pedido items:', itemsError);
+      // El pedido ya se subió, solo fallan los items
+    }
+
+    // Marcar como sincronizado localmente
+    await put<Pedido>('pedidos', {
+      ...pedido,
+      sincronizado: true,
+      estado: 'sincronizado',
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error uploading single pedido:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Subir pedidos pendientes a Supabase
 export const uploadPedidos = async (): Promise<{ count: number; error?: string }> => {
   try {
@@ -174,50 +235,10 @@ export const uploadPedidos = async (): Promise<{ count: number; error?: string }
     let uploaded = 0;
     
     for (const pedido of pedidosPendientes) {
-      // Insertar el pedido
-      const { data: pedidoData, error: pedidoError } = await supabase
-        .from('pedidos')
-        .insert({
-          id: pedido.id,
-          cliente_id: pedido.cliente_id,
-          total: pedido.total,
-          estado: pedido.estado,
-          notas: pedido.notas,
-          created_at: pedido.created_at,
-        })
-        .select()
-        .single();
-
-      if (pedidoError) {
-        console.error('Error uploading pedido:', pedidoError);
-        continue;
+      const result = await uploadSinglePedido(pedido);
+      if (result.success) {
+        uploaded++;
       }
-
-      // Insertar los items del pedido
-      const itemsToInsert = pedido.items.map(item => ({
-        pedido_id: pedido.id,
-        producto_id: item.producto_id,
-        cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
-        subtotal: item.subtotal,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('pedido_items')
-        .insert(itemsToInsert);
-
-      if (itemsError) {
-        console.error('Error uploading pedido items:', itemsError);
-      }
-
-      // Marcar como sincronizado localmente
-      await put<Pedido>('pedidos', {
-        ...pedido,
-        sincronizado: true,
-        estado: 'sincronizado',
-      });
-      
-      uploaded++;
     }
     
     return { count: uploaded };
