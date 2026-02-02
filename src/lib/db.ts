@@ -226,33 +226,33 @@ export const countByIndex = async (
 };
 
 export const getSyncStatus = async (): Promise<SyncStatus> => {
-  const [
-    clientesTotal,
-    clientesPendientes,
-    productosTotal,
-    productosPendientes,
-    pedidosTotal,
-    pedidosPendientes,
-    cobranzasTotal,
-    cobranzasPendientes
-  ] = await Promise.all([
-    getAll('clientes').then(items => items.length),
-    countByIndex('clientes', 'sincronizado', false as unknown as IDBValidKey),
-    getAll('productos').then(items => items.length),
-    countByIndex('productos', 'sincronizado', false as unknown as IDBValidKey),
-    getAll('pedidos').then(items => items.length),
-    countByIndex('pedidos', 'sincronizado', false as unknown as IDBValidKey),
-    getAll('cobranzas').then(items => items.length),
-    countByIndex('cobranzas', 'sincronizado', false as unknown as IDBValidKey),
+  // Get all items and filter in JS (IndexedDB doesn't support boolean keys)
+  const [clientes, productos, pedidos, cobranzas] = await Promise.all([
+    getAll<Cliente>('clientes'),
+    getAll<Producto>('productos'),
+    getAll<Pedido>('pedidos'),
+    getAll<Cobranza>('cobranzas'),
   ]);
 
   const config = await getById<{ key: string; value: string }>('config', 'lastSync');
 
   return {
-    clientes: { total: clientesTotal, pendientes: clientesPendientes },
-    productos: { total: productosTotal, pendientes: productosPendientes },
-    pedidos: { total: pedidosTotal, pendientes: pedidosPendientes },
-    cobranzas: { total: cobranzasTotal, pendientes: cobranzasPendientes },
+    clientes: { 
+      total: clientes.length, 
+      pendientes: clientes.filter(c => !c.sincronizado).length 
+    },
+    productos: { 
+      total: productos.length, 
+      pendientes: productos.filter(p => !p.sincronizado).length 
+    },
+    pedidos: { 
+      total: pedidos.length, 
+      pendientes: pedidos.filter(p => !p.sincronizado).length 
+    },
+    cobranzas: { 
+      total: cobranzas.length, 
+      pendientes: cobranzas.filter(c => !c.sincronizado).length 
+    },
     lastSync: config?.value || null,
   };
 };
