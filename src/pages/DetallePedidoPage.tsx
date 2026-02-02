@@ -137,6 +137,9 @@ export const DetallePedidoPage = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver a Pedidos
         </Button>
+
+        {/* Estado y alerta de sincronización */}
+        {!pedido.sincronizado && (
           <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
