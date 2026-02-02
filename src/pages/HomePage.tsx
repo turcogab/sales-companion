@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, Package, ShoppingCart, MapPin, CreditCard, 
@@ -9,7 +9,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { fullSync } from '@/lib/syncService';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const quickActions = [
   { path: '/clientes', icon: Users, label: 'Clientes', color: 'bg-primary' },
@@ -25,12 +27,30 @@ export const HomePage = () => {
   const [syncing, setSyncing] = useState(false);
 
   const handleSync = async () => {
-    if (!isOnline) return;
+    if (!isOnline) {
+      toast.error('Sin conexión a internet');
+      return;
+    }
+    
     setSyncing(true);
-    // TODO: Implementar sincronización real con Supabase
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await refresh();
-    setSyncing(false);
+    try {
+      const result = await fullSync();
+      
+      if (result.success) {
+        toast.success(
+          `Sincronizado: ${result.downloaded.clientes} clientes, ${result.downloaded.productos} productos`
+        );
+      } else {
+        toast.error(`Errores: ${result.errors.join(', ')}`);
+      }
+      
+      await refresh();
+    } catch (error) {
+      toast.error('Error al sincronizar');
+      console.error(error);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
