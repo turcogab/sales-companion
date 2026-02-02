@@ -265,7 +265,7 @@ export const NuevoPedidoPage = () => {
                           <p className="font-medium text-foreground truncate">{producto.nombre}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-sm font-semibold text-primary">
-                              {formatCurrency(producto.precio)}
+                              {formatCurrency(producto.precio_calculado || producto.precio)}
                             </p>
                             <span className={cn(
                               "text-xs",
