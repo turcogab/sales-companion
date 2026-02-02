@@ -128,6 +128,9 @@ export const NuevoPedidoPage = () => {
 
     setSaving(true);
     try {
+      // Asegurar que la DB esté inicializada
+      await initDB();
+      
       const pedido: Pedido = {
         id: generateId(),
         cliente_id: selectedCliente.id,
@@ -140,7 +143,9 @@ export const NuevoPedidoPage = () => {
         sincronizado: false,
       };
 
+      console.log('Guardando pedido:', pedido);
       await put('pedidos', pedido);
+      console.log('Pedido guardado exitosamente');
       toast.success('Pedido guardado');
       navigate('/pedidos');
     } catch (error) {
