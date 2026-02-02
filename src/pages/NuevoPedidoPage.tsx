@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger 
 } from '@/components/ui/sheet';
-import { getAll, put, generateId, Cliente, Pedido, ItemPedido, ListaPrecioPorcentaje } from '@/lib/db';
+import { getAll, put, generateId, initDB, Cliente, Pedido, ItemPedido, ListaPrecioPorcentaje } from '@/lib/db';
 import { getProductosConPrecios, ProductoConPrecio } from '@/lib/priceService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
