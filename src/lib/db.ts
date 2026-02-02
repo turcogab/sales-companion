@@ -1,6 +1,6 @@
 // IndexedDB para almacenamiento offline
 const DB_NAME = 'preventista_db';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 
 export interface Cliente {
   id: string;
