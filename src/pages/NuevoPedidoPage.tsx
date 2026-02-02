@@ -57,19 +57,20 @@ export const NuevoPedidoPage = () => {
   );
 
   const addToCart = (producto: Producto) => {
-    if (producto.stock <= 0) {
-      toast.error('Producto sin stock');
-      return;
-    }
-
     const existingItem = cart.find((item) => item.producto_id === producto.id);
     
     if (existingItem) {
-      if (existingItem.cantidad >= producto.stock) {
-        toast.error('Stock insuficiente');
-        return;
-      }
       setCart(
+        cart.map((item) =>
+          item.producto_id === producto.id
+            ? {
+                ...item,
+                cantidad: item.cantidad + 1,
+                subtotal: (item.cantidad + 1) * item.precio_unitario,
+              }
+            : item
+        )
+      );
         cart.map((item) =>
           item.producto_id === producto.id
             ? {
