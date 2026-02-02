@@ -3,25 +3,48 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
+import { initDB } from "@/lib/db";
+
+import { HomePage } from "@/pages/HomePage";
+import { ClientesPage } from "@/pages/ClientesPage";
+import { ProductosPage } from "@/pages/ProductosPage";
+import { PedidosPage } from "@/pages/PedidosPage";
+import { NuevoPedidoPage } from "@/pages/NuevoPedidoPage";
+import { RutaPage } from "@/pages/RutaPage";
+import { CobranzasPage } from "@/pages/CobranzasPage";
+import { NuevaCobranzaPage } from "@/pages/NuevaCobranzaPage";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    // Inicializar IndexedDB al cargar la app
+    initDB().catch(console.error);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner position="top-center" />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/clientes" element={<ClientesPage />} />
+            <Route path="/productos" element={<ProductosPage />} />
+            <Route path="/pedidos" element={<PedidosPage />} />
+            <Route path="/pedidos/nuevo" element={<NuevoPedidoPage />} />
+            <Route path="/ruta" element={<RutaPage />} />
+            <Route path="/cobranzas" element={<CobranzasPage />} />
+            <Route path="/cobranzas/nueva" element={<NuevaCobranzaPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
