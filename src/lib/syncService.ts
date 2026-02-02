@@ -75,37 +75,45 @@ export const syncClientes = async (): Promise<{ count: number; error?: string }>
   }
 };
 
-// Descargar productos desde Supabase
+// Descargar productos desde Supabase (con paginación)
 export const syncProductos = async (): Promise<{ count: number; error?: string }> => {
   try {
-    const { data, error } = await supabase
-      .from('productos')
-      .select('*');
+    let allData: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from('productos')
+        .select('*')
+        .range(from, from + pageSize - 1);
 
-    if (error) throw error;
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      
+      allData = [...allData, ...data];
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
 
-    if (data) {
-      await clearStore('productos');
-      
-      for (const producto of data) {
-        await put<Producto>('productos', {
-          id: producto.id,
-          codigo: producto.codigo || '',
-          nombre: producto.nombre || producto.descripcion || '',
-          descripcion: producto.descripcion || '',
-          precio: producto.precio || producto.precio_venta || 0,
-          stock: producto.stock || producto.stock_actual || 0,
-          categoria: producto.categoria || 'General',
-          imagen_url: producto.imagen_url,
-          sincronizado: true,
-          updated_at: producto.updated_at || new Date().toISOString(),
-        });
-      }
-      
-      return { count: data.length };
+    await clearStore('productos');
+    
+    for (const producto of allData) {
+      await put<Producto>('productos', {
+        id: producto.id,
+        codigo: producto.codigo || '',
+        nombre: producto.nombre || producto.descripcion || '',
+        descripcion: producto.descripcion || '',
+        precio: producto.precio || producto.precio_venta || 0,
+        stock: producto.stock || producto.stock_actual || 0,
+        categoria: producto.categoria || 'General',
+        imagen_url: producto.imagen_url,
+        sincronizado: true,
+        updated_at: producto.updated_at || new Date().toISOString(),
+      });
     }
     
-    return { count: 0 };
+    return { count: allData.length };
   } catch (error: any) {
     console.error('Error syncing productos:', error);
     return { count: 0, error: error.message };
