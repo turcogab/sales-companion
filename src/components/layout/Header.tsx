@@ -77,6 +77,18 @@ export const Header = ({ title, onMenuClick, showMenu = true }: HeaderProps) => 
               <RefreshCw className="h-5 w-5" />
             </Button>
           )}
+
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSignOut}
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              title={user?.email || 'Cerrar sesión'}
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </header>
