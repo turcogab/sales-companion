@@ -107,7 +107,8 @@ export const syncProductos = async (): Promise<{ count: number; error?: string }
 // Subir pedidos pendientes a Supabase
 export const uploadPedidos = async (): Promise<{ count: number; error?: string }> => {
   try {
-    const pedidosPendientes = await getByIndex<Pedido>('pedidos', 'sincronizado', false as unknown as IDBValidKey);
+    const allPedidos = await getAll<Pedido>('pedidos');
+    const pedidosPendientes = allPedidos.filter(p => !p.sincronizado);
     
     let uploaded = 0;
     
