@@ -25,7 +25,15 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const { status, loading, refresh, pendingCount } = useSyncStatus();
   const isOnline = useOnlineStatus();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [syncing, setSyncing] = useState(false);
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/auth');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSync = async () => {
     if (!isOnline) {
