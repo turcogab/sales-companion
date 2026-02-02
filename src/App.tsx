@@ -15,6 +15,7 @@ import { DetallePedidoPage } from "@/pages/DetallePedidoPage";
 import { RutaPage } from "@/pages/RutaPage";
 import { CobranzasPage } from "@/pages/CobranzasPage";
 import { NuevaCobranzaPage } from "@/pages/NuevaCobranzaPage";
+import { AuthPage } from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
