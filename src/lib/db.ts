@@ -94,45 +94,43 @@ export const initDB = (): Promise<IDBDatabase> => {
     request.onupgradeneeded = (event) => {
       const database = (event.target as IDBOpenDBRequest).result;
 
-      // Clientes
-      if (!database.objectStoreNames.contains('clientes')) {
-        const clientesStore = database.createObjectStore('clientes', { keyPath: 'id' });
-        clientesStore.createIndex('codigo', 'codigo', { unique: true });
-        clientesStore.createIndex('nombre', 'nombre', { unique: false });
-        clientesStore.createIndex('sincronizado', 'sincronizado', { unique: false });
-        clientesStore.createIndex('orden_ruta', 'orden_ruta', { unique: false });
-      }
+      // Borrar stores existentes para recrear con nuevo esquema
+      const storeNames = ['clientes', 'productos', 'pedidos', 'cobranzas', 'config'];
+      storeNames.forEach(name => {
+        if (database.objectStoreNames.contains(name)) {
+          database.deleteObjectStore(name);
+        }
+      });
 
-      // Productos
-      if (!database.objectStoreNames.contains('productos')) {
-        const productosStore = database.createObjectStore('productos', { keyPath: 'id' });
-        productosStore.createIndex('codigo', 'codigo', { unique: true });
-        productosStore.createIndex('nombre', 'nombre', { unique: false });
-        productosStore.createIndex('categoria', 'categoria', { unique: false });
-        productosStore.createIndex('sincronizado', 'sincronizado', { unique: false });
-      }
+      // Clientes - codigo NO único
+      const clientesStore = database.createObjectStore('clientes', { keyPath: 'id' });
+      clientesStore.createIndex('codigo', 'codigo', { unique: false });
+      clientesStore.createIndex('nombre', 'nombre', { unique: false });
+      clientesStore.createIndex('sincronizado', 'sincronizado', { unique: false });
+      clientesStore.createIndex('orden_ruta', 'orden_ruta', { unique: false });
+
+      // Productos - codigo NO único
+      const productosStore = database.createObjectStore('productos', { keyPath: 'id' });
+      productosStore.createIndex('codigo', 'codigo', { unique: false });
+      productosStore.createIndex('nombre', 'nombre', { unique: false });
+      productosStore.createIndex('categoria', 'categoria', { unique: false });
+      productosStore.createIndex('sincronizado', 'sincronizado', { unique: false });
 
       // Pedidos
-      if (!database.objectStoreNames.contains('pedidos')) {
-        const pedidosStore = database.createObjectStore('pedidos', { keyPath: 'id' });
-        pedidosStore.createIndex('cliente_id', 'cliente_id', { unique: false });
-        pedidosStore.createIndex('estado', 'estado', { unique: false });
-        pedidosStore.createIndex('sincronizado', 'sincronizado', { unique: false });
-        pedidosStore.createIndex('created_at', 'created_at', { unique: false });
-      }
+      const pedidosStore = database.createObjectStore('pedidos', { keyPath: 'id' });
+      pedidosStore.createIndex('cliente_id', 'cliente_id', { unique: false });
+      pedidosStore.createIndex('estado', 'estado', { unique: false });
+      pedidosStore.createIndex('sincronizado', 'sincronizado', { unique: false });
+      pedidosStore.createIndex('created_at', 'created_at', { unique: false });
 
       // Cobranzas
-      if (!database.objectStoreNames.contains('cobranzas')) {
-        const cobranzasStore = database.createObjectStore('cobranzas', { keyPath: 'id' });
-        cobranzasStore.createIndex('cliente_id', 'cliente_id', { unique: false });
-        cobranzasStore.createIndex('sincronizado', 'sincronizado', { unique: false });
-        cobranzasStore.createIndex('created_at', 'created_at', { unique: false });
-      }
+      const cobranzasStore = database.createObjectStore('cobranzas', { keyPath: 'id' });
+      cobranzasStore.createIndex('cliente_id', 'cliente_id', { unique: false });
+      cobranzasStore.createIndex('sincronizado', 'sincronizado', { unique: false });
+      cobranzasStore.createIndex('created_at', 'created_at', { unique: false });
 
       // Config
-      if (!database.objectStoreNames.contains('config')) {
-        database.createObjectStore('config', { keyPath: 'key' });
-      }
+      database.createObjectStore('config', { keyPath: 'key' });
     };
   });
 };
