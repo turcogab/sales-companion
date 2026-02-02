@@ -57,18 +57,9 @@ export const NuevoPedidoPage = () => {
   );
 
   const addToCart = (producto: Producto) => {
-    if (producto.stock <= 0) {
-      toast.error('Producto sin stock');
-      return;
-    }
-
     const existingItem = cart.find((item) => item.producto_id === producto.id);
     
     if (existingItem) {
-      if (existingItem.cantidad >= producto.stock) {
-        toast.error('Stock insuficiente');
-        return;
-      }
       setCart(
         cart.map((item) =>
           item.producto_id === producto.id
@@ -102,10 +93,6 @@ export const NuevoPedidoPage = () => {
           if (item.producto_id === productoId) {
             const newQty = item.cantidad + delta;
             if (newQty <= 0) return null;
-            if (newQty > item.stock) {
-              toast.error('Stock insuficiente');
-              return item;
-            }
             return {
               ...item,
               cantidad: newQty,
@@ -267,10 +254,7 @@ export const NuevoPedidoPage = () => {
                 return (
                   <Card
                     key={producto.id}
-                    className={cn(
-                      "shadow-card",
-                      producto.stock <= 0 && "opacity-50"
-                    )}
+                    className="shadow-card"
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
@@ -313,7 +297,6 @@ export const NuevoPedidoPage = () => {
                           <Button
                             size="sm"
                             onClick={() => addToCart(producto)}
-                            disabled={producto.stock <= 0}
                             className="gradient-primary"
                           >
                             <Plus className="h-4 w-4 mr-1" />
