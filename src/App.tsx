@@ -11,6 +11,7 @@ import { ClientesPage } from "@/pages/ClientesPage";
 import { ProductosPage } from "@/pages/ProductosPage";
 import { PedidosPage } from "@/pages/PedidosPage";
 import { NuevoPedidoPage } from "@/pages/NuevoPedidoPage";
+import { DetallePedidoPage } from "@/pages/DetallePedidoPage";
 import { RutaPage } from "@/pages/RutaPage";
 import { CobranzasPage } from "@/pages/CobranzasPage";
 import { NuevaCobranzaPage } from "@/pages/NuevaCobranzaPage";
