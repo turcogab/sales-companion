@@ -204,7 +204,7 @@ export const uploadSinglePedido = async (pedido: Pedido): Promise<{ success: boo
     }));
 
     const { error: itemsError } = await supabase
-      .from('pedido_items')
+      .from('pedido_detalles')
       .insert(itemsToInsert);
 
     if (itemsError) {
