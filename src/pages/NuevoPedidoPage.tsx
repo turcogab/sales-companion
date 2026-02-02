@@ -24,7 +24,7 @@ interface CartItem extends ItemPedido {
 export const NuevoPedidoPage = () => {
   const navigate = useNavigate();
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [productos, setProductos] = useState<Producto[]>([]);
+  const [productos, setProductos] = useState<ProductoConPrecio[]>([]);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchCliente, setSearchCliente] = useState('');
