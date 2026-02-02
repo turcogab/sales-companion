@@ -125,17 +125,18 @@ export const DetallePedidoPage = () => {
   }
 
   return (
-    <MobileLayout 
-      title="Detalle del Pedido"
-      headerLeft={
-        <Button variant="ghost" size="icon" onClick={() => navigate('/pedidos')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      }
-    >
+    <MobileLayout title="Detalle del Pedido">
       <div className="p-4 space-y-4 pb-32">
-        {/* Estado y alerta de sincronización */}
-        {!pedido.sincronizado && (
+        {/* Botón de volver */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate('/pedidos')}
+          className="mb-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver a Pedidos
+        </Button>
           <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
