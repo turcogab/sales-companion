@@ -106,7 +106,7 @@ export const initDB = (): Promise<IDBDatabase> => {
       const database = (event.target as IDBOpenDBRequest).result;
 
       // Borrar stores existentes para recrear con nuevo esquema
-      const storeNames = ['clientes', 'productos', 'pedidos', 'cobranzas', 'config'];
+      const storeNames = ['clientes', 'productos', 'pedidos', 'cobranzas', 'config', 'lista_precio_porcentajes'];
       storeNames.forEach(name => {
         if (database.objectStoreNames.contains(name)) {
           database.deleteObjectStore(name);
@@ -126,6 +126,14 @@ export const initDB = (): Promise<IDBDatabase> => {
       productosStore.createIndex('nombre', 'nombre', { unique: false });
       productosStore.createIndex('categoria', 'categoria', { unique: false });
       productosStore.createIndex('sincronizado', 'sincronizado', { unique: false });
+      productosStore.createIndex('marca_id', 'marca_id', { unique: false });
+      productosStore.createIndex('tipo_producto_id', 'tipo_producto_id', { unique: false });
+
+      // Lista precio porcentajes
+      const listaPreciosStore = database.createObjectStore('lista_precio_porcentajes', { keyPath: 'id' });
+      listaPreciosStore.createIndex('lista_precio_id', 'lista_precio_id', { unique: false });
+      listaPreciosStore.createIndex('marca_id', 'marca_id', { unique: false });
+      listaPreciosStore.createIndex('tipo_producto_id', 'tipo_producto_id', { unique: false });
 
       // Pedidos
       const pedidosStore = database.createObjectStore('pedidos', { keyPath: 'id' });
