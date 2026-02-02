@@ -8,7 +8,8 @@ import {
   Cliente, 
   Producto, 
   Pedido, 
-  Cobranza 
+  Cobranza,
+  ListaPrecioPorcentaje
 } from './db';
 
 export interface SyncResult {
