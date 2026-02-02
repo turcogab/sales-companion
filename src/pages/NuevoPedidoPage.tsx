@@ -71,16 +71,6 @@ export const NuevoPedidoPage = () => {
             : item
         )
       );
-        cart.map((item) =>
-          item.producto_id === producto.id
-            ? {
-                ...item,
-                cantidad: item.cantidad + 1,
-                subtotal: (item.cantidad + 1) * item.precio_unitario,
-              }
-            : item
-        )
-      );
     } else {
       setCart([
         ...cart,
