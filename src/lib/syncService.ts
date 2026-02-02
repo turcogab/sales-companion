@@ -168,12 +168,20 @@ export const syncListaPrecioPorcentajes = async (): Promise<{ count: number; err
 // Subir un pedido individual a Supabase
 export const uploadSinglePedido = async (pedido: Pedido): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Insertar el pedido
+    // Obtener el usuario autenticado
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { success: false, error: 'Debes iniciar sesión para sincronizar' };
+    }
+
+    // Insertar el pedido con usuario_id
     const { error: pedidoError } = await supabase
       .from('pedidos')
       .insert({
         id: pedido.id,
         cliente_id: pedido.cliente_id,
+        usuario_id: user.id,
         total: pedido.total,
         estado: pedido.estado,
         notas: pedido.notas,
