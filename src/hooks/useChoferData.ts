@@ -28,7 +28,7 @@ export const useChoferData = () => {
 
       // Obtener hoja de ruta del día
       const { data: hojaData, error: hojaError } = await supabase
-        .from('hoja_ruta')
+        .from('hojas_rutas')
         .select('*')
         .eq('fecha', hoy)
         .in('estado', ['pendiente', 'en_progreso'])
@@ -84,7 +84,7 @@ export const useChoferData = () => {
     
     try {
       const { error } = await supabase
-        .from('hoja_ruta')
+        .from('hojas_rutas')
         .update({ estado: 'en_progreso' })
         .eq('id', hojaRuta.id);
 
@@ -295,7 +295,7 @@ export const useChoferData = () => {
 
       // Actualizar estado de la hoja de ruta
       const { error: updateError } = await supabase
-        .from('hoja_ruta')
+        .from('hojas_rutas')
         .update({ estado: 'completada' })
         .eq('id', hojaRuta.id);
 
