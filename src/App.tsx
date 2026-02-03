@@ -54,25 +54,30 @@ const App = () => {
             <Route path="/cobranzas" element={<CobranzasPage />} />
             <Route path="/cobranzas/nueva" element={<NuevaCobranzaPage />} />
             
-            {/* Rutas de Chofer/Camionero - Protegidas */}
+            {/* Rutas de Chofer/Camionero - Requieren rol 'chofer' */}
             <Route path="/chofer" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['chofer', 'admin']}>
                 <ChoferHomePage />
               </ProtectedRoute>
             } />
             <Route path="/chofer/ruta" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['chofer', 'admin']}>
                 <ChoferRutaPage />
               </ProtectedRoute>
             } />
             <Route path="/chofer/entregas" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['chofer', 'admin']}>
                 <ChoferEntregasPage />
               </ProtectedRoute>
             } />
             <Route path="/chofer/entregas/:id" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['chofer', 'admin']}>
                 <DetalleEntregaPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chofer/rendicion" element={
+              <ProtectedRoute allowedRoles={['chofer', 'admin']}>
+                <RendicionPage />
               </ProtectedRoute>
             } />
             <Route path="/chofer/rendicion" element={
