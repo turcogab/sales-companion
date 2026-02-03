@@ -77,6 +77,7 @@ export const DetalleEntregaPage = () => {
       setLoading(true);
       const { supabase } = await import('@/lib/supabase');
       
+      // Cargar parada con cobros y devoluciones
       const { data, error } = await supabase
         .from('hoja_ruta_paradas')
         .select(`
@@ -92,7 +93,54 @@ export const DetalleEntregaPage = () => {
       if (data) {
         const cobros = data.cobros || [];
         const monto_cobrado = cobros.reduce((sum: number, c: any) => sum + Number(c.monto), 0);
-        setParada({ ...data, monto_cobrado } as HojaRutaParada);
+        
+        // Cargar datos del pedido
+        let pedidoData = null;
+        if (data.pedido_id) {
+          const { data: pedido } = await supabase
+            .from('pedidos')
+            .select(`
+              id,
+              cliente_id,
+              total,
+              clientes(nombre, direccion, telefono),
+              pedido_detalles(
+                producto_id,
+                cantidad_pedida,
+                precio_unitario,
+                subtotal,
+                productos(nombre)
+              )
+            `)
+            .eq('id', data.pedido_id)
+            .maybeSingle();
+          
+          if (pedido) {
+            const cliente = pedido.clientes as any;
+            const detalles = pedido.pedido_detalles as any[] || [];
+            
+            pedidoData = {
+              id: pedido.id,
+              cliente_nombre: cliente?.nombre || 'Cliente desconocido',
+              cliente_direccion: cliente?.direccion,
+              cliente_telefono: cliente?.telefono,
+              total: pedido.total || 0,
+              items: detalles.map((d: any) => ({
+                producto_id: d.producto_id,
+                producto_nombre: d.productos?.nombre || 'Producto',
+                cantidad: d.cantidad_pedida,
+                precio_unitario: d.precio_unitario,
+                subtotal: d.subtotal,
+              })),
+            };
+          }
+        }
+        
+        setParada({ 
+          ...data, 
+          monto_cobrado,
+          pedido: pedidoData,
+        } as HojaRutaParada);
       }
     } catch (err) {
       console.error('Error loading parada:', err);
