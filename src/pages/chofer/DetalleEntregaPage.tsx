@@ -49,9 +49,10 @@ import { cn } from '@/lib/utils';
 export const DetalleEntregaPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { paradas, actualizarEstadoEntrega, registrarCobro, registrarDevolucion, refetch } = useChoferData();
+  const { actualizarEstadoEntrega, registrarCobro, registrarDevolucion } = useChoferData();
   
   const [parada, setParada] = useState<HojaRutaParada | null>(null);
+  const [loading, setLoading] = useState(true);
   const [cobroDialogOpen, setCobroDialogOpen] = useState(false);
   const [devolucionDialogOpen, setDevolucionDialogOpen] = useState(false);
   
@@ -68,12 +69,41 @@ export const DetalleEntregaPage = () => {
   const [devMotivo, setDevMotivo] = useState<MotivoDevolucion>('producto_danado');
   const [devDetalle, setDevDetalle] = useState('');
 
-  useEffect(() => {
-    if (id && paradas.length > 0) {
-      const found = paradas.find(p => p.id === id);
-      setParada(found || null);
+  // Cargar la parada directamente por ID
+  const loadParada = async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      const { supabase } = await import('@/lib/supabase');
+      
+      const { data, error } = await supabase
+        .from('hoja_ruta_paradas')
+        .select(`
+          *,
+          cobros(*),
+          devoluciones(*)
+        `)
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        const cobros = data.cobros || [];
+        const monto_cobrado = cobros.reduce((sum: number, c: any) => sum + Number(c.monto), 0);
+        setParada({ ...data, monto_cobrado } as HojaRutaParada);
+      }
+    } catch (err) {
+      console.error('Error loading parada:', err);
+    } finally {
+      setLoading(false);
     }
-  }, [id, paradas]);
+  };
+
+  useEffect(() => {
+    loadParada();
+  }, [id]);
 
   const handleEstadoChange = async (nuevoEstado: EstadoEntrega) => {
     if (!parada) return;
@@ -103,7 +133,7 @@ export const DetalleEntregaPage = () => {
     if (result) {
       setCobroDialogOpen(false);
       resetCobroForm();
-      refetch();
+      loadParada(); // Recargar datos
     }
   };
 
@@ -124,7 +154,7 @@ export const DetalleEntregaPage = () => {
     if (result) {
       setDevolucionDialogOpen(false);
       resetDevolucionForm();
-      refetch();
+      loadParada(); // Recargar datos
     }
   };
 
@@ -150,7 +180,7 @@ export const DetalleEntregaPage = () => {
     );
   };
 
-  if (!parada) {
+  if (loading || !parada) {
     return (
       <ChoferLayout title="Detalle de Entrega" showNav={false}>
         <div className="p-4 text-center">
