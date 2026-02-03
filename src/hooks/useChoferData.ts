@@ -18,22 +18,51 @@ export const useChoferData = (fechaSeleccionada?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar la hoja de ruta del día
+  // Cargar la hoja de ruta del día o ruta activa
   const loadHojaRutaDelDia = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const fecha = fechaSeleccionada || new Date().toISOString().split('T')[0];
+      let hojaData = null;
 
-      // Obtener hoja de ruta del día
-      const { data: hojaData, error: hojaError } = await supabase
-        .from('hojas_ruta')
-        .select('*')
-        .eq('fecha', fecha)
-        .maybeSingle();
+      if (fechaSeleccionada) {
+        // Si se especifica una fecha, buscar esa fecha
+        const { data, error: hojaError } = await supabase
+          .from('hojas_ruta')
+          .select('*')
+          .eq('fecha', fechaSeleccionada)
+          .maybeSingle();
 
-      if (hojaError) throw hojaError;
+        if (hojaError) throw hojaError;
+        hojaData = data;
+      } else {
+        // Buscar primero una ruta activa (en_ruta o en_progreso)
+        const { data: rutaActiva, error: activaError } = await supabase
+          .from('hojas_ruta')
+          .select('*')
+          .in('estado', ['en_ruta', 'en_progreso'])
+          .order('fecha', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (activaError) throw activaError;
+
+        if (rutaActiva) {
+          hojaData = rutaActiva;
+        } else {
+          // Si no hay ruta activa, buscar la de hoy
+          const fecha = new Date().toISOString().split('T')[0];
+          const { data, error: hojaError } = await supabase
+            .from('hojas_ruta')
+            .select('*')
+            .eq('fecha', fecha)
+            .maybeSingle();
+
+          if (hojaError) throw hojaError;
+          hojaData = data;
+        }
+      }
 
       if (!hojaData) {
         setHojaRuta(null);
