@@ -56,13 +56,15 @@ export const useChoferData = (fechaSeleccionada?: string) => {
 
       if (paradasError) throw paradasError;
 
-      // Procesar paradas para calcular montos
+      // Procesar paradas para calcular montos y mapear columnas
       const paradasProcesadas = (paradasData || []).map((parada: any) => {
         const cobros = parada.cobros || [];
         const monto_cobrado = cobros.reduce((sum: number, c: Cobro) => sum + Number(c.monto), 0);
         
         return {
           ...parada,
+          // La tabla externa usa 'estado' en lugar de 'estado_entrega'
+          estado_entrega: parada.estado || parada.estado_entrega || 'pendiente',
           monto_cobrado,
           // El monto pendiente se calculará cuando tengamos el total del pedido
         } as HojaRutaParada;
