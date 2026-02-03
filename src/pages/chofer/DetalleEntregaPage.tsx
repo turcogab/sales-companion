@@ -94,40 +94,51 @@ export const DetalleEntregaPage = () => {
         const cobros = data.cobros || [];
         const monto_cobrado = cobros.reduce((sum: number, c: any) => sum + Number(c.monto), 0);
         
-        // Cargar datos del pedido
+        // Cargar datos del pedido - consultas separadas para mayor compatibilidad
         let pedidoData = null;
         if (data.pedido_id) {
+          // Obtener pedido básico
           const { data: pedido } = await supabase
             .from('pedidos')
-            .select(`
-              id,
-              cliente_id,
-              total,
-              clientes(nombre, direccion, telefono),
-              pedido_detalles(
-                producto_id,
-                cantidad_pedida,
-                precio_unitario,
-                subtotal,
-                productos(nombre)
-              )
-            `)
+            .select('*')
             .eq('id', data.pedido_id)
             .maybeSingle();
           
           if (pedido) {
-            const cliente = pedido.clientes as any;
-            const detalles = pedido.pedido_detalles as any[] || [];
+            // Obtener cliente si existe cliente_id
+            let clienteNombre = 'Cliente';
+            let clienteDireccion = '';
+            let clienteTelefono = '';
+            
+            if (pedido.cliente_id) {
+              const { data: cliente } = await supabase
+                .from('clientes')
+                .select('nombre, direccion, telefono')
+                .eq('id', pedido.cliente_id)
+                .maybeSingle();
+              
+              if (cliente) {
+                clienteNombre = cliente.nombre || 'Cliente';
+                clienteDireccion = cliente.direccion || '';
+                clienteTelefono = cliente.telefono || '';
+              }
+            }
+            
+            // Obtener detalles del pedido
+            const { data: detalles } = await supabase
+              .from('pedido_detalles')
+              .select('producto_id, cantidad_pedida, precio_unitario, subtotal')
+              .eq('pedido_id', data.pedido_id);
             
             pedidoData = {
               id: pedido.id,
-              cliente_nombre: cliente?.nombre || 'Cliente desconocido',
-              cliente_direccion: cliente?.direccion,
-              cliente_telefono: cliente?.telefono,
+              cliente_nombre: clienteNombre,
+              cliente_direccion: clienteDireccion,
+              cliente_telefono: clienteTelefono,
               total: pedido.total || 0,
-              items: detalles.map((d: any) => ({
+              items: (detalles || []).map((d: any) => ({
                 producto_id: d.producto_id,
-                producto_nombre: d.productos?.nombre || 'Producto',
+                producto_nombre: 'Producto',
                 cantidad: d.cantidad_pedida,
                 precio_unitario: d.precio_unitario,
                 subtotal: d.subtotal,
