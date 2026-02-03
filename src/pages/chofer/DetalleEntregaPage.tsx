@@ -140,12 +140,14 @@ export const DetalleEntregaPage = () => {
             console.log('Product IDs a buscar:', productIds);
             
             if (productIds.length > 0) {
+              // Primero intentamos con select * para ver la estructura
               const { data: productos, error: productosError } = await supabase
                 .from('productos')
-                .select('id, nombre')
-                .in('id', productIds);
+                .select('*')
+                .in('id', productIds)
+                .limit(5);
               
-              console.log('Productos encontrados:', productos, 'Error:', productosError);
+              console.log('Estructura productos:', productos?.[0], 'Error:', productosError);
               
               if (productos && productos.length > 0) {
                 productosMap = productos.reduce((acc: Record<string, string>, p: any) => {
