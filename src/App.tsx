@@ -17,6 +17,7 @@ import { CobranzasPage } from "@/pages/CobranzasPage";
 import { NuevaCobranzaPage } from "@/pages/NuevaCobranzaPage";
 import { AuthPage } from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 // Páginas de Chofer/Camionero
 import { 
@@ -53,12 +54,32 @@ const App = () => {
             <Route path="/cobranzas" element={<CobranzasPage />} />
             <Route path="/cobranzas/nueva" element={<NuevaCobranzaPage />} />
             
-            {/* Rutas de Chofer/Camionero */}
-            <Route path="/chofer" element={<ChoferHomePage />} />
-            <Route path="/chofer/ruta" element={<ChoferRutaPage />} />
-            <Route path="/chofer/entregas" element={<ChoferEntregasPage />} />
-            <Route path="/chofer/entregas/:id" element={<DetalleEntregaPage />} />
-            <Route path="/chofer/rendicion" element={<RendicionPage />} />
+            {/* Rutas de Chofer/Camionero - Protegidas */}
+            <Route path="/chofer" element={
+              <ProtectedRoute>
+                <ChoferHomePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chofer/ruta" element={
+              <ProtectedRoute>
+                <ChoferRutaPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chofer/entregas" element={
+              <ProtectedRoute>
+                <ChoferEntregasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chofer/entregas/:id" element={
+              <ProtectedRoute>
+                <DetalleEntregaPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chofer/rendicion" element={
+              <ProtectedRoute>
+                <RendicionPage />
+              </ProtectedRoute>
+            } />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
