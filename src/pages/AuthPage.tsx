@@ -9,6 +9,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Loader2, LogIn, UserPlus } from 'lucide-react';
 
+// Función para obtener el rol del usuario y redirigir
+const redirectByRole = async (navigate: ReturnType<typeof useNavigate>) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: usuario } = await supabase
+    .from('usuarios')
+    .select('rol')
+    .eq('user_id', user.id)
+    .eq('activo', true)
+    .maybeSingle();
+
+  if (usuario?.rol === 'chofer') {
+    navigate('/chofer');
+  } else {
+    navigate('/');
+  }
+};
+
 export const AuthPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -28,7 +47,7 @@ export const AuthPage = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        await redirectByRole(navigate);
       }
       setCheckingSession(false);
     };
@@ -36,9 +55,9 @@ export const AuthPage = () => {
     checkSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate('/');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session && event === 'SIGNED_IN') {
+        await redirectByRole(navigate);
       }
     });
 
