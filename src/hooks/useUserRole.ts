@@ -21,10 +21,9 @@ export const useUserRole = () => {
 
       try {
         const { data, error } = await supabase
-          .from('usuarios')
-          .select('id, rol')
+          .from('user_roles')
+          .select('id, role')
           .eq('user_id', user.id)
-          .eq('activo', true)
           .maybeSingle();
 
         if (error) {
@@ -32,10 +31,10 @@ export const useUserRole = () => {
           setRole(null);
           setUsuarioId(null);
         } else if (data) {
-          setRole(data.rol as UserRole);
+          setRole(data.role as UserRole);
           setUsuarioId(data.id);
         } else {
-          // Usuario autenticado pero sin registro en tabla usuarios
+          // Usuario autenticado pero sin registro en tabla user_roles
           setRole(null);
           setUsuarioId(null);
         }
