@@ -9,7 +9,8 @@ import {
   RotateCcw,
   Phone,
   MapPin,
-  Navigation
+  Navigation,
+  ShoppingBag
 } from 'lucide-react';
 import { ChoferLayout } from '@/components/layout/ChoferLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -124,11 +125,29 @@ export const DetalleEntregaPage = () => {
               }
             }
             
-            // Obtener detalles del pedido
+            // Obtener detalles del pedido con nombres de productos
             const { data: detalles } = await supabase
               .from('pedido_detalles')
               .select('producto_id, cantidad_pedida, precio_unitario, subtotal')
               .eq('pedido_id', data.pedido_id);
+            
+            // Obtener nombres de productos
+            const productIds = (detalles || []).map((d: any) => d.producto_id);
+            let productosMap: Record<string, string> = {};
+            
+            if (productIds.length > 0) {
+              const { data: productos } = await supabase
+                .from('productos')
+                .select('id, nombre')
+                .in('id', productIds);
+              
+              if (productos) {
+                productosMap = productos.reduce((acc: Record<string, string>, p: any) => {
+                  acc[p.id] = p.nombre;
+                  return acc;
+                }, {});
+              }
+            }
             
             pedidoData = {
               id: pedido.id,
@@ -138,7 +157,7 @@ export const DetalleEntregaPage = () => {
               total: pedido.total || 0,
               items: (detalles || []).map((d: any) => ({
                 producto_id: d.producto_id,
-                producto_nombre: 'Producto',
+                producto_nombre: productosMap[d.producto_id] || 'Producto',
                 cantidad: d.cantidad_pedida,
                 precio_unitario: d.precio_unitario,
                 subtotal: d.subtotal,
@@ -306,6 +325,33 @@ export const DetalleEntregaPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Detalle del pedido */}
+        {parada.pedido?.items && parada.pedido.items.length > 0 && (
+          <Card className="shadow-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Detalle del Pedido ({parada.pedido.items.length} productos)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {parada.pedido.items.map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{item.producto_nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.cantidad} x ${item.precio_unitario?.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <span className="font-semibold">
+                    ${item.subtotal?.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Estado de entrega */}
         <Card className="shadow-card">
