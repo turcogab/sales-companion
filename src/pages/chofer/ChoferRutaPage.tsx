@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Navigation, CheckCircle, Package, Clock, AlertCircle } from 'lucide-react';
+import { MapPin, Phone, Navigation, CheckCircle, Package, Clock, AlertCircle, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { ChoferLayout } from '@/components/layout/ChoferLayout';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useChoferData } from '@/hooks/useChoferData';
 import { ESTADO_ENTREGA_LABELS } from '@/types/chofer';
 import { cn } from '@/lib/utils';
 
 export const ChoferRutaPage = () => {
   const navigate = useNavigate();
-  const { hojaRuta, paradas, loading } = useChoferData();
+  const [fechaSeleccionada, setFechaSeleccionada] = useState<Date>(new Date());
+  
+  const fechaStr = format(fechaSeleccionada, 'yyyy-MM-dd');
+  const { hojaRuta, paradas, loading } = useChoferData(fechaStr);
 
   const getEstadoIcon = (estado: string) => {
     switch (estado) {
@@ -65,11 +72,32 @@ export const ChoferRutaPage = () => {
   if (!hojaRuta || paradas.length === 0) {
     return (
       <ChoferLayout title="Ruta de Entregas">
-        <div className="p-4">
+        <div className="p-4 space-y-4">
+          {/* Selector de fecha */}
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="justify-start text-left font-normal flex-1">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(fechaSeleccionada, "EEEE, d 'de' MMMM", { locale: es })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaSeleccionada}
+                  onSelect={(date) => date && setFechaSeleccionada(date)}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
           <EmptyState
             icon={MapPin}
             title="Sin paradas"
-            description="No hay entregas programadas para esta ruta"
+            description={`No hay entregas programadas para ${format(fechaSeleccionada, "d 'de' MMMM", { locale: es })}`}
           />
         </div>
       </ChoferLayout>
@@ -78,7 +106,29 @@ export const ChoferRutaPage = () => {
 
   return (
     <ChoferLayout title="Ruta de Entregas">
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-4">
+        {/* Selector de fecha */}
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="justify-start text-left font-normal flex-1">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(fechaSeleccionada, "EEEE, d 'de' MMMM", { locale: es })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={fechaSeleccionada}
+                onSelect={(date) => date && setFechaSeleccionada(date)}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Lista de paradas */}
         {paradas.map((parada, index) => {
           const isCompleted = ['entregado', 'entrega_parcial', 'rechazado', 'no_entregado'].includes(parada.estado_entrega);
           

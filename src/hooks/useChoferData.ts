@@ -12,7 +12,7 @@ import {
 } from '@/types/chofer';
 import { toast } from 'sonner';
 
-export const useChoferData = () => {
+export const useChoferData = (fechaSeleccionada?: string) => {
   const [hojaRuta, setHojaRuta] = useState<HojaRuta | null>(null);
   const [paradas, setParadas] = useState<HojaRutaParada[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +24,13 @@ export const useChoferData = () => {
       setLoading(true);
       setError(null);
 
-      const hoy = new Date().toISOString().split('T')[0];
+      const fecha = fechaSeleccionada || new Date().toISOString().split('T')[0];
 
       // Obtener hoja de ruta del día
       const { data: hojaData, error: hojaError } = await supabase
         .from('hojas_ruta')
         .select('*')
-        .eq('fecha', hoy)
+        .eq('fecha', fecha)
         .in('estado', ['pendiente', 'en_progreso'])
         .maybeSingle();
 
@@ -76,7 +76,7 @@ export const useChoferData = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fechaSeleccionada]);
 
   // Iniciar ruta (cambiar estado a en_progreso)
   const iniciarRuta = async () => {
