@@ -166,8 +166,10 @@ export const DetalleEntregaPage = () => {
           }
         }
         
+        // La tabla externa usa 'estado' en lugar de 'estado_entrega'
         setParada({ 
           ...data, 
+          estado_entrega: data.estado || data.estado_entrega || 'pendiente',
           monto_cobrado,
           pedido: pedidoData,
         } as HojaRutaParada);

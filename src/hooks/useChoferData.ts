@@ -106,8 +106,9 @@ export const useChoferData = (fechaSeleccionada?: string) => {
     observaciones?: string
   ) => {
     try {
-      const updateData: Partial<HojaRutaParada> = {
-        estado_entrega: nuevoEstado,
+      // La tabla externa usa 'estado' en lugar de 'estado_entrega'
+      const updateData: Record<string, any> = {
+        estado: nuevoEstado,
         observaciones,
       };
 
@@ -129,10 +130,10 @@ export const useChoferData = (fechaSeleccionada?: string) => {
 
       if (error) throw error;
 
-      // Actualizar estado local
+      // Actualizar estado local (mantenemos estado_entrega para compatibilidad interna)
       setParadas(prev => prev.map(p => 
         p.id === paradaId 
-          ? { ...p, ...updateData }
+          ? { ...p, estado_entrega: nuevoEstado, ...updateData }
           : p
       ));
 
