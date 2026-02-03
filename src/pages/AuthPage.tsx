@@ -14,14 +14,13 @@ const redirectByRole = async (navigate: ReturnType<typeof useNavigate>) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data: usuario } = await supabase
-    .from('usuarios')
-    .select('rol')
+  const { data: userRole } = await supabase
+    .from('user_roles')
+    .select('role')
     .eq('user_id', user.id)
-    .eq('activo', true)
     .maybeSingle();
 
-  if (usuario?.rol === 'chofer') {
+  if (userRole?.role === 'chofer') {
     navigate('/chofer');
   } else {
     navigate('/');
