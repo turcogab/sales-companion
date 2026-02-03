@@ -27,14 +27,11 @@ export const useChoferData = (fechaSeleccionada?: string) => {
       const fecha = fechaSeleccionada || new Date().toISOString().split('T')[0];
 
       // Obtener hoja de ruta del día
-      // Primero intentamos sin filtro de estado para debug
       const { data: hojaData, error: hojaError } = await supabase
         .from('hojas_ruta')
         .select('*')
         .eq('fecha', fecha)
         .maybeSingle();
-      
-      console.log('Query hojas_ruta para fecha:', fecha, 'Resultado:', hojaData, 'Error:', hojaError);
 
       if (hojaError) throw hojaError;
 
