@@ -18,6 +18,15 @@ import { NuevaCobranzaPage } from "@/pages/NuevaCobranzaPage";
 import { AuthPage } from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
+// Páginas de Chofer/Camionero
+import { 
+  ChoferHomePage, 
+  ChoferRutaPage, 
+  ChoferEntregasPage, 
+  DetalleEntregaPage,
+  RendicionPage 
+} from "@/pages/chofer";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -43,6 +52,14 @@ const App = () => {
             <Route path="/ruta" element={<RutaPage />} />
             <Route path="/cobranzas" element={<CobranzasPage />} />
             <Route path="/cobranzas/nueva" element={<NuevaCobranzaPage />} />
+            
+            {/* Rutas de Chofer/Camionero */}
+            <Route path="/chofer" element={<ChoferHomePage />} />
+            <Route path="/chofer/ruta" element={<ChoferRutaPage />} />
+            <Route path="/chofer/entregas" element={<ChoferEntregasPage />} />
+            <Route path="/chofer/entregas/:id" element={<DetalleEntregaPage />} />
+            <Route path="/chofer/rendicion" element={<RendicionPage />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
