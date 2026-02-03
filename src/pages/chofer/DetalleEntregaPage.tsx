@@ -126,38 +126,28 @@ export const DetalleEntregaPage = () => {
             }
             
             // Obtener detalles del pedido con nombres de productos
-            const { data: detalles, error: detallesError } = await supabase
+            const { data: detalles } = await supabase
               .from('pedido_detalles')
               .select('producto_id, cantidad_pedida, precio_unitario, subtotal')
               .eq('pedido_id', data.pedido_id);
-            
-            console.log('Detalles del pedido:', detalles, 'Error:', detallesError);
             
             // Obtener nombres de productos
             const productIds = (detalles || []).map((d: any) => d.producto_id).filter(Boolean);
             let productosMap: Record<string, string> = {};
             
-            console.log('Product IDs a buscar:', productIds);
-            
             if (productIds.length > 0) {
-              // Primero intentamos con select * para ver la estructura
               const { data: productos, error: productosError } = await supabase
                 .from('productos')
-                .select('*')
-                .in('id', productIds)
-                .limit(5);
-              
-              console.log('Estructura productos:', productos?.[0], 'Error:', productosError);
+                .select('id, descripcion')
+                .in('id', productIds);
               
               if (productos && productos.length > 0) {
                 productosMap = productos.reduce((acc: Record<string, string>, p: any) => {
-                  acc[p.id] = p.nombre;
+                  acc[p.id] = p.descripcion || 'Sin nombre';
                   return acc;
                 }, {});
               }
             }
-            
-            console.log('Mapa de productos:', productosMap);
             
             pedidoData = {
               id: pedido.id,
